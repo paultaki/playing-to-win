@@ -1,0 +1,117 @@
+{
+  "skill_name": "playing-to-win",
+  "version": "1.0.0",
+  "description": "Trigger tests and structural assertions for the Playing to Win Claude Skill. Each eval verifies that the skill activates on a realistic operator prompt and produces the required 12-section output across four phases.",
+  "evals": [
+    {
+      "id": 1,
+      "label": "explicit-framework-name",
+      "prompt": "Build me a Playing to Win framework around my new flat-fee bookkeeping service for Shopify DTC brands.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_output_includes": [
+        "Winning Aspiration",
+        "Where to Play",
+        "How to Win",
+        "Required Capabilities",
+        "Management Systems",
+        "Where Not to Play",
+        "What Must Be True",
+        "Red-Team Pre-Mortem",
+        "Recommendation"
+      ],
+      "expected_verdict_one_of": ["Proceed", "Narrow", "Test manually", "Park", "Kill"]
+    },
+    {
+      "id": 2,
+      "label": "abbreviation-trigger",
+      "prompt": "Run a P2W cascade on this offer: a $99/month newsletter for solo founders.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_output_includes": ["①", "②", "③", "④", "⑤", "Recommendation"]
+    },
+    {
+      "id": 3,
+      "label": "pressure-test-trigger",
+      "prompt": "Pressure-test this idea: an AI tool that writes personalized birthday cards for executives.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_output_includes": [
+        "Executive Verdict",
+        "Where to Play",
+        "How to Win",
+        "Red-Team Pre-Mortem",
+        "30-Day Validation Plan"
+      ]
+    },
+    {
+      "id": 4,
+      "label": "red-team-trigger",
+      "prompt": "Red-team this strategy: I want to be the default AI advisor for Fortune 500 CROs.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_output_includes": [
+        "Winning Aspiration",
+        "Where Not to Play",
+        "Biggest capability gap",
+        "Recommendation"
+      ]
+    },
+    {
+      "id": 5,
+      "label": "where-to-play-trigger",
+      "prompt": "Where should we play with our scholarship matching product?",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_output_includes": [
+        "Primary customer",
+        "Use case",
+        "Channel",
+        "Where Not to Play"
+      ]
+    },
+    {
+      "id": 6,
+      "label": "codebase-invocation",
+      "prompt": "Build me a Playing to Win framework around this project.",
+      "context": "Invoked inside an open codebase with README.md, package.json, and marketing copy.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_behaviors": [
+        "Reads README and package.json before producing output",
+        "Quotes existing positioning copy verbatim in Step 2a Discovery",
+        "Labels claims as FACT, INFERENCE, ASSUMPTION, or SPECULATION"
+      ]
+    },
+    {
+      "id": 7,
+      "label": "strategy-file-written",
+      "prompt": "P2W cascade for Northwind Books. Save the output.",
+      "expected_skill_triggered": "playing-to-win",
+      "expected_artifacts": [
+        "./strategy/playing-to-win-northwind-books-{date}.md"
+      ],
+      "expected_artifact_frontmatter_fields": [
+        "subject",
+        "verdict",
+        "confidence",
+        "date",
+        "generated_by"
+      ]
+    },
+    {
+      "id": 8,
+      "label": "should-not-trigger-generic-advice",
+      "prompt": "Give me general business advice for a new startup.",
+      "expected_skill_triggered": null,
+      "rationale": "The skill should NOT trigger on generic business advice requests. Triggers require explicit framework naming or pressure-test / red-team / where-to-play language."
+    }
+  ],
+  "structural_assertions": {
+    "required_phases_in_order": [
+      "Diagnosis",
+      "The Cascade",
+      "Stress Test",
+      "Verdict"
+    ],
+    "cascade_callouts_must_be_numbered": ["①", "②", "③", "④", "⑤"],
+    "must_end_with_recommendation_banner": true,
+    "must_include_kill_or_reposition_rule": true,
+    "must_separate_facts_from_assumptions": true,
+    "must_write_strategy_file_unless_user_opts_out": true
+  }
+}

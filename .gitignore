@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+
+# Node (in case scripts get added later)
+node_modules/
+npm-debug.log*
+
+# Python (in case scripts get added later)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Generated strategy outputs
+# These are user-specific deliverables, not skill source.
+strategy/
+
+# Local-only test scratch
+scratch/
+*.local.md
