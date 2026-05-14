@@ -1,12 +1,13 @@
-# Playing to Win — Claude Skill
+# Playing to Win: Strategy Framework for Claude Code
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
 [![Built for Claude Code](https://img.shields.io/badge/built%20for-Claude%20Code-orange.svg)](https://claude.com/code)
 
-A Claude Code skill that pressure-tests a business idea, offer, or product
-strategy through Roger Martin and A.G. Lafley's Playing to Win choice
-cascade. Operator-built. Free. No teaching — direct application.
+A Claude Code skill that applies the Playing to Win strategy framework
+from Roger Martin and A.G. Lafley to pressure-test a business idea,
+offer, or product strategy. Operator-built. Free. No teaching, direct
+application.
 
 ---
 
@@ -163,14 +164,16 @@ This skill enforces a specific voice on its output:
 
 ## Why this skill exists
 
-Playing to Win was rolled out across twelve teams during the author's
-twenty years at Verizon. All twelve hit their goals. It is the only
-strategy framework worth running on a Tuesday morning when you need
-a real verdict by Wednesday.
+I ran the Playing to Win strategy framework across sales leadership
+roles for twenty years at Verizon. I took three teams from last place to first using this exact
+cascade, and won President's Cabinet four times applying it. Across
+twelve teams I rolled it out to, all twelve hit their goals. It is the
+only strategy framework worth running on a Tuesday morning when you
+need a real verdict by Wednesday.
 
-The problem with most strategy work is that it lives in slides. You write
-a deck, present it, and three months later nobody can remember the
-choices it asked you to make. This skill turns the cascade into a
+The problem with most strategy work is that it lives in slides. You
+write a deck, present it, and three months later nobody can remember
+the choices it asked you to make. This skill turns the cascade into a
 callable function and a written artifact.
 
 ---
