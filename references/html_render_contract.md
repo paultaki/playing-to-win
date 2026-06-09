@@ -87,7 +87,7 @@ and the `p2w-conf` `data-level` must match.
   <li data-relates="where-to-play" data-confidence="medium">
     <span class="p2w-conf" data-level="medium">Medium</span>
     <span>$500K–$3M Shopify brands feel monthly bookkeeping pain.
-      <a class="p2w-how" href="#">Test: survey 30 brands in DTC Slack.</a></span>
+      <span class="p2w-how">Test: survey 30 brands in DTC Slack.</span></span>
   </li>
   <li data-relates="how-to-win" data-confidence="low">
     <span class="p2w-conf" data-level="low">Low</span>
