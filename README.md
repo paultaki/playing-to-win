@@ -1,7 +1,7 @@
 # Playing to Win: Strategy Framework for Claude Code
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](CHANGELOG.md)
 [![Built for Claude Code](https://img.shields.io/badge/built%20for-Claude%20Code-orange.svg)](https://claude.com/code)
 
 A Claude Code skill that applies the Playing to Win strategy framework
@@ -31,8 +31,12 @@ When invoked, this skill:
    - **Phase III — Stress Test:** What Must Be True, Red-Team Pre-Mortem
    - **Phase IV — Verdict:** Sharpened Version, 30-Day Validation Plan,
      Presentation-Ready Summary, Recommendation
-5. **Writes a strategy file** to `./strategy/playing-to-win-{slug}-{date}.md`
-   with YAML frontmatter so the output persists beyond the conversation.
+5. **Writes the strategy as two files** to `./strategy/`:
+   - `playing-to-win-{slug}-{date}.html` — a self-contained, interactive Swiss-design
+     page (left phase rail, click-to-expand cascade, assumption cross-highlighting,
+     print mode). Opens by double-click; no server or build step. This is the primary
+     deliverable, and it opens automatically.
+   - `playing-to-win-{slug}-{date}.md` — the canonical markdown source (pandoc-convertible).
 6. **Ends with a single verdict:** Proceed, Narrow, Test manually, Park,
    or Kill.
 
@@ -104,6 +108,17 @@ coaching prompts. The trigger phrases are deliberately specific.
 
 ---
 
+## HTML output
+
+Every run produces a self-contained interactive HTML page alongside the markdown. It is
+a single file with all CSS and JavaScript inlined and **no external assets** — it works
+offline, opens by double-click, and prints to a clean handout. Navigation is a sticky
+left phase rail; the cascade nodes expand on click and cross-highlight their related
+assumptions; a "spotlight" toggle dims everything except the unproven assumptions.
+
+The design is brand-neutral (Swiss/International) so anyone can use it. See
+[`examples/example-output.html`](examples/example-output.html) for a full sample.
+
 ## Convert the output to other formats
 
 The strategy file is canonical Markdown. Convert via pandoc
@@ -136,14 +151,19 @@ playing-to-win/
 ├── evals/
 │   └── evals.json                        # Anthropic-format trigger tests
 ├── examples/
-│   └── example-output.md                 # Full sample strategy output
+│   ├── example-output.md                 # Full sample strategy output (Markdown)
+│   └── example-output.html               # Same sample, rendered interactive page
+├── scripts/
+│   └── verify-output.mjs                 # Dependency-free checker for generated HTML
 └── references/
     ├── strategy_quality_rubric.md        # Verdict scale, quality gates
     ├── strategy_example_bank.md          # Weak / strong / sharpened pairs
     ├── assumption_test_bank.md           # Practical tests by type
     ├── positioning_patterns.md           # Strong / weak positioning
     ├── strategy_preferences.md           # Tone and style calibration
-    └── execution_patterns.md             # Rollout and adoption patterns
+    ├── execution_patterns.md             # Rollout and adoption patterns
+    ├── html_render_contract.md           # Component vocabulary for the HTML page
+    └── strategy-template.html            # Locked self-contained HTML shell
 ```
 
 ---

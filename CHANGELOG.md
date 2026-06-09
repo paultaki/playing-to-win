@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 Nothing yet.
 
+## [1.1.0] — 2026-06-08
+
+### Added
+- Self-contained interactive HTML strategy page generated on every run, written next to
+  the markdown file at `./strategy/playing-to-win-{slug}-{date}.html` and opened
+  automatically. Swiss/International design: sticky left phase rail with scrollspy and
+  progress, click-to-expand cascade nodes, choice⇄assumption cross-highlighting, an
+  "assumption spotlight" toggle, ghosted "where not to play" exclusions, a red verdict
+  plate, and a print stylesheet. No server, build step, or external assets.
+- `references/strategy-template.html` — the locked, self-contained page template.
+- `references/html_render_contract.md` — the component vocabulary the skill follows when
+  rendering the page.
+- `examples/example-output.html` — the Northwind example rendered as a page.
+- `scripts/verify-output.mjs` — dependency-free verifier for generated HTML.
+
+### Changed
+- The terminal output is now a short briefing (verdict, strongest/weakest/risk/fastest
+  improvement, first 30-day move, file paths) instead of the full 12-section dump. The
+  full editorial format remains the content of the markdown file.
+
 ## [1.0.0] — 2026-05-14
 
 Initial public release.
@@ -66,5 +86,6 @@ Initial public release.
   example bank, assumption tests, positioning patterns, output style,
   and execution patterns.
 
-[Unreleased]: https://github.com/paultaki/playing-to-win/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/paultaki/playing-to-win/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/paultaki/playing-to-win/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/paultaki/playing-to-win/releases/tag/v1.0.0
