@@ -1,7 +1,7 @@
 ---
 name: playing-to-win
 description: This skill should be used when the user asks to evaluate, sharpen, red-team, or pressure-test a business idea, offer, market choice, product, or strategic move using Roger Martin and A.G. Lafley's Playing to Win choice cascade. Triggers on phrases including "Playing to Win", "P2W", "where to play", "how to win", "winning aspiration", "build me a strategy", "red-team this idea", "pressure-test this", "Plan to Win", or "build a strategy framework around this project". Produces a structured 12-section output across four phases (Diagnosis, Cascade, Stress Test, Verdict), writes a persistent markdown strategy file, and ends with a clear Proceed / Narrow / Test manually / Park / Kill recommendation.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Playing to Win Strategy Builder
@@ -96,13 +96,15 @@ Internally confirm:
 - Biggest risk named
 - Practical 30-day test included
 - Final recommendation: Proceed / Narrow / Test manually / Park / Kill
-- Strategy file path reported (see Step 6)
+- Both strategy file paths reported: `.html` (primary) and `.md` (see Step 6)
 
 If any gate fails, fix it before returning.
 
-### Step 6 — Write the Strategy File
+### Step 6 — Write the Strategy Files (Markdown + HTML)
 
-After the in-conversation output is complete, write the full output to a persistent markdown file:
+After the analysis is complete, write the full output to BOTH a persistent markdown file and a self-contained interactive HTML page. Do not dump all 12 sections into the terminal; the terminal gets a short briefing instead (see the Standard Output section below).
+
+First write the markdown file:
 
 - Default path: `./strategy/playing-to-win-{slug}-{YYYY-MM-DD}.md`
 - Slug is a lowercase, hyphenated version of the subject (e.g. `northwind-books`, `atlas-payroll-clinics`)
@@ -116,15 +118,32 @@ subject: <one-line subject>
 verdict: <Proceed | Narrow | Test manually | Park | Kill>
 confidence: <Low | Medium | High>
 date: <YYYY-MM-DD>
-generated_by: playing-to-win v1.0
+generated_by: playing-to-win v1.1
 ---
 ```
 
-Then write the full editorial output below the frontmatter. Report the absolute path of the written file as the final line of the response.
+Then write the full editorial output below the frontmatter.
+
+#### HTML page
+
+Also write a self-contained interactive HTML page next to the markdown file:
+
+- Path: `./strategy/playing-to-win-{slug}-{date}.html` (same slug and date as the markdown).
+- Read `references/strategy-template.html`. Replace the tokens `{{SUBJECT}}`, `{{VERDICT}}`, `{{CONFIDENCE}}`, `{{DATE}}`, `{{YEAR}}`, then replace the `<!-- P2W:BODY -->` marker with the 13 sections rendered as semantic HTML.
+- Follow `references/html_render_contract.md` exactly for the component structure (load it now). The template's CSS and JS depend on those classes and data attributes.
+- Generate all 13 sections in order: snapshot (with the 5-node cascade and "where not to play"), executive-verdict, the five cascade sections, what-must-be-true (assumptions cross-linked to cascade nodes via `data-relates`), premortem, sharpened, validation-plan, summary, recommendation (verdict plate).
+- Write the result as one file. It must be fully self-contained: no external fonts, scripts, or styles.
+- After writing, open it in the default browser (best effort): run `open "<path>"` on macOS, `xdg-open "<path>"` on Linux, or `start "" "<path>"` on Windows. If opening fails or the environment is headless, just report the path.
+
+See `examples/example-output.html` for a complete rendered reference.
+
+Report the absolute paths of BOTH written files (`.html` first, then `.md`) at the end of the response.
 
 If the working directory is read-only or the user has specified a different location, ask once before writing.
 
 ## Standard Output (Editorial Format)
+
+**Terminal vs. files.** The full 12-section editorial format below is the content of the **markdown file** (the HTML page renders the same content as 13 sections — the closing recommendation banner becomes its own section). In the terminal (chat) do NOT print all 12 sections. Print a short briefing only: the verdict and confidence; the strongest part, weakest part, biggest risk, and fastest improvement; the single first move from the 30-day plan; and the two file paths (`.html` and `.md`). The HTML page is the primary deliverable to read.
 
 Render the 12 sections in this exact order, grouped into four phases. Use Unicode box characters (━ ┏ ┓ ┃ ┗ ┛ ╔ ╗ ╚ ╝ ║ ═) for the editorial callouts shown below. Plain Unicode only — no ANSI color codes.
 
@@ -176,7 +195,7 @@ In standard Markdown list contexts (outside code blocks), use `-` as the bullet 
 ║                                                                              ║
 ║  <One-sentence rationale, wrapped at ~70 chars width.>                       ║
 ║                                                                              ║
-║  Strategy file: ./strategy/playing-to-win-{slug}-{date}.md                   ║
+║  Strategy page: ./strategy/playing-to-win-{slug}-{date}.html                 ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -450,7 +469,7 @@ Close the entire output with the double-line recommendation banner specified in 
 ║                                                                              ║
 ║  <One-sentence rationale tied to the strongest fact or assumption.>          ║
 ║                                                                              ║
-║  Strategy file: ./strategy/playing-to-win-<slug>-<date>.md                   ║
+║  Strategy page: ./strategy/playing-to-win-<slug>-<date>.html                 ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -508,6 +527,8 @@ Load on demand. Do not auto-load all of these every conversation.
 - `references/positioning_patterns.md` — strong and weak positioning, wedge patterns, where-not-to-play
 - `references/strategy_preferences.md` — output style, decision lenses, tone calibration
 - `references/execution_patterns.md` — execution lens patterns for rollout, adoption, and operating cadence
+- `references/html_render_contract.md` — component vocabulary for rendering the HTML page (load at write time, Step 6)
+- `references/strategy-template.html` — locked self-contained HTML shell injected at write time (asset, not prose)
 
 ## Common Mistakes
 
