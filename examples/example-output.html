@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind Books — flat-fee bookkeeping for Shopify DTC brands — Playing to Win</title>
+<style>
+:root{
+  --ink:#111;--paper:#fff;--red:#e2231a;
+  --gray-1:#666;--gray-2:#8a8a8a;--line:#e3e3e3;--bg-soft:#fafafa;
+  --rail-w:280px;--content-max:760px;
+  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'Helvetica Neue',Arial,'Segoe UI',Roboto,system-ui,sans-serif;
+  --space:clamp(2rem,4vw,4rem);--dur:200ms;--ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h2,h3{font-weight:800}
+a{color:var(--ink);text-underline-offset:3px}
+
+.p2w-masthead{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;
+  padding:var(--space) var(--space) 1.5rem;border-bottom:2px solid var(--ink)}
+.p2w-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gray-1);margin:0 0 .75rem}
+.p2w-title{font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-.02em;
+  line-height:1.02;margin:0}
+.p2w-meta{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:1rem 0 0;
+  font-size:13px;color:var(--gray-1)}
+.p2w-chip{background:var(--red);color:#fff;font-weight:800;letter-spacing:.08em;
+  font-size:12px;padding:.3em .7em}
+#p2w-spotlight-toggle{margin-top:1.1rem;font:600 12px/1 var(--sans);letter-spacing:.04em;
+  background:none;border:1px solid var(--ink);padding:.6em .95em;cursor:pointer}
+#p2w-spotlight-toggle[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.p2w-progress{position:sticky;top:0;height:3px;background:var(--line);z-index:20}
+.p2w-progress-fill{height:100%;width:0;background:var(--red);transition:width var(--dur) var(--ease)}
+
+.p2w-layout{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;display:grid;
+  grid-template-columns:var(--rail-w) 1fr;gap:var(--space);padding:0 var(--space)}
+@media (max-width:880px){.p2w-layout{grid-template-columns:1fr;gap:0}}
+
+.p2w-rail{position:sticky;top:2rem;align-self:start;height:max-content;padding:2rem 0;font-size:13px}
+@media (max-width:880px){.p2w-rail{position:static;padding:1rem 0;border-bottom:1px solid var(--line)}}
+.p2w-rail-phase{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink);font-weight:700;margin:1.4rem 0 .4rem}
+.p2w-rail-phase:first-child{margin-top:0}
+.p2w-rail-item{display:block;color:var(--gray-1);text-decoration:none;padding:.3rem 0 .3rem .8rem;
+  border-left:2px solid transparent;line-height:1.3}
+.p2w-rail-item:hover{color:var(--ink)}
+.p2w-rail-item.is-active{color:var(--ink);font-weight:700;border-left-color:var(--red)}
+.p2w-rail-item:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+.p2w-main{min-width:0;max-width:var(--content-max);padding:2rem 0 6rem}
+.p2w-section{padding:2.5rem 0;border-top:1px solid var(--line);scroll-margin-top:2rem}
+.p2w-section:first-child{border-top:none;padding-top:1rem}
+.p2w-section>h2{font-size:13px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gray-1);margin:0 0 1.2rem;display:flex;gap:.6rem;align-items:baseline}
+.p2w-section-no{color:var(--red);font-weight:700}
+.p2w-subhead{font-size:12px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray-1);margin:1.6rem 0 .6rem}
+
+.p2w-cascade{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.p2w-node{border-bottom:1px solid var(--line)}
+.p2w-node-head{display:flex;gap:1rem;align-items:baseline;width:100%;text-align:left;background:none;
+  border:none;cursor:pointer;padding:1rem 0;font:800 18px/1.2 var(--sans);color:var(--ink)}
+.p2w-node-head:hover{background:var(--bg-soft)}
+.p2w-node-head:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.p2w-num{font-size:28px;font-weight:800;line-height:1;min-width:1.6em;color:var(--gray-2)}
+.p2w-node:first-child .p2w-num,.p2w-node.is-open .p2w-num{color:var(--red)}
+.p2w-node-detail{overflow:hidden;transition:max-height var(--dur) var(--ease)}
+.p2w-node-detail-inner{padding:0 0 1.2rem 3.4rem;font-size:15px}
+
+.p2w-assumptions{list-style:none;margin:0;padding:0}
+.p2w-assumptions li{display:flex;gap:.8rem;align-items:baseline;padding:.7rem 0;
+  border-bottom:1px solid var(--line);cursor:pointer;transition:background var(--dur)}
+.p2w-assumptions li.is-linked{background:#fff4f3;box-shadow:inset 3px 0 0 var(--red)}
+.p2w-conf{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  padding:.2em .5em;border:1px solid var(--ink);min-width:5.5em;text-align:center}
+.p2w-conf[data-level="low"]{color:var(--red);border-color:var(--red)}
+.p2w-conf[data-level="unknown"]{border-style:dashed;color:var(--gray-1)}
+.p2w-how{display:block;font-size:12px;color:var(--gray-1);margin-top:.2rem}
+
+.p2w-exclude{list-style:none;margin:0;padding:0}
+.p2w-exclude li{padding:.5rem 0 .5rem 1.6rem;position:relative;color:var(--gray-1);
+  text-decoration:line-through;text-decoration-color:var(--red)}
+.p2w-exclude li::before{content:"✕";position:absolute;left:0;color:var(--red);font-weight:700;
+  text-decoration:none}
+
+.p2w-table{width:100%;border-collapse:collapse;font-size:14px;margin:.5rem 0}
+.p2w-table th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--gray-1);border-bottom:2px solid var(--ink);
+  padding:.6rem .8rem .6rem 0;vertical-align:bottom}
+.p2w-table td{border-bottom:1px solid var(--line);padding:.7rem .8rem .7rem 0;vertical-align:top}
+.p2w-table tr:hover td{background:var(--bg-soft)}
+
+.p2w-ev{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:.15em .45em;white-space:nowrap}
+.p2w-ev[data-kind="fact"]{background:var(--ink);color:#fff}
+.p2w-ev[data-kind="inference"]{border:1px solid var(--ink)}
+.p2w-ev[data-kind="assumption"]{background:var(--red);color:#fff}
+.p2w-ev[data-kind="speculation"]{border:1px dashed var(--gray-1);color:var(--gray-1)}
+
+.p2w-pointer{font-weight:700;border-left:3px solid var(--red);padding-left:1rem;margin:1.4rem 0}
+
+.p2w-defs{margin:0}
+.p2w-defs dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gray-1);margin-top:1.1rem}
+.p2w-defs dd{margin:.25rem 0 0}
+
+.p2w-verdict-plate{background:var(--red);color:#fff;padding:var(--space);margin-top:2.5rem}
+.p2w-verdict-word{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:.02em;margin:0}
+.p2w-verdict-rationale{font-size:17px;line-height:1.5;margin:1rem 0 0;max-width:60ch}
+
+.p2w-footer{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;
+  padding:2rem var(--space) 4rem;border-top:1px solid var(--line);font-size:12px;color:var(--gray-1)}
+.p2w-footer a{color:var(--gray-1)}
+
+body.p2w-spotlight .p2w-main>.p2w-section{opacity:.22;transition:opacity var(--dur)}
+body.p2w-spotlight .p2w-section:has(.p2w-ev[data-kind="assumption"]),
+body.p2w-spotlight .p2w-section:has(.p2w-conf[data-level="low"]),
+body.p2w-spotlight .p2w-section:has(.p2w-conf[data-level="unknown"]){opacity:1}
+body.p2w-spotlight .p2w-assumptions li{opacity:.22}
+body.p2w-spotlight .p2w-assumptions li:has(.p2w-conf[data-level="low"]),
+body.p2w-spotlight .p2w-assumptions li:has(.p2w-conf[data-level="unknown"]){opacity:1}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
+@media print{
+  .p2w-rail,.p2w-progress,#p2w-spotlight-toggle{display:none}
+  .p2w-layout{display:block;max-width:none;padding:0}
+  .p2w-main{max-width:none;padding:0}
+  .p2w-node-detail{max-height:none!important;overflow:visible!important}
+  .p2w-node-head{cursor:default}
+  .p2w-section{break-inside:avoid}
+  body{font-size:11pt}
+}
+</style>
+</head>
+<body>
+<header class="p2w-masthead">
+  <p class="p2w-kicker">Playing to Win · Strategy Dossier</p>
+  <h1 class="p2w-title">Northwind Books — flat-fee bookkeeping for Shopify DTC brands</h1>
+  <p class="p2w-meta">
+    <span class="p2w-chip">NARROW</span>
+    <span class="p2w-confidence">Medium confidence</span>
+    <span class="p2w-date">2026-05-14</span>
+  </p>
+  <button id="p2w-spotlight-toggle" type="button" aria-pressed="false">Spotlight assumptions</button>
+</header>
+
+<div class="p2w-progress" aria-hidden="true"><div class="p2w-progress-fill"></div></div>
+
+<div class="p2w-layout">
+  <nav class="p2w-rail" aria-label="Strategy sections"><!-- built by JS --></nav>
+  <main class="p2w-main">
+    <section class="p2w-section" id="snapshot" data-phase="1" data-section="snapshot" data-label="Snapshot">
+      <h2><span class="p2w-section-no">01</span> P2W Snapshot</h2>
+      <ol class="p2w-cascade">
+        <li class="p2w-node" data-node="aspiration">
+          <button class="p2w-node-head" type="button"><span class="p2w-num">01</span> Winning Aspiration</button>
+          <div class="p2w-node-detail"><div class="p2w-node-detail-inner">
+            Become the default monthly bookkeeping service for single-channel Shopify DTC brands ($500K–$3M GMV) who are too big for a spreadsheet and too small for a CFO.
+          </div></div>
+        </li>
+        <li class="p2w-node" data-node="where-to-play">
+          <button class="p2w-node-head" type="button"><span class="p2w-num">02</span> Where to Play</button>
+          <div class="p2w-node-detail"><div class="p2w-node-detail-inner">
+            Single-channel Shopify brands, $500K–$3M. DTC operator forums and agency referrals first.
+          </div></div>
+        </li>
+        <li class="p2w-node" data-node="how-to-win">
+          <button class="p2w-node-head" type="button"><span class="p2w-num">03</span> How to Win</button>
+          <div class="p2w-node-detail"><div class="p2w-node-detail-inner">
+            Flat $499/month, no tiers. DTC-native workflow (Shopify, A2X, inventory) built in, not bolted on. Books closed in 7 business days.
+          </div></div>
+        </li>
+        <li class="p2w-node" data-node="capabilities">
+          <button class="p2w-node-head" type="button"><span class="p2w-num">04</span> Required Capabilities</button>
+          <div class="p2w-node-detail"><div class="p2w-node-detail-inner">
+            DTC close playbook, A2X/inventory expertise, trained bookkeeper pool, DTC operator referral network.
+          </div></div>
+        </li>
+        <li class="p2w-node" data-node="management">
+          <button class="p2w-node-head" type="button"><span class="p2w-num">05</span> Management Systems</button>
+          <div class="p2w-node-detail"><div class="p2w-node-detail-inner">
+            Pipeline tracker, time-per-close, month-3 retention, NPS, referral attribution.
+          </div></div>
+        </li>
+      </ol>
+      <h3 class="p2w-subhead">Where not to play</h3>
+      <ul class="p2w-exclude">
+        <li>Multi-channel brands (Shopify + Amazon + retail)</li>
+        <li>Service-based small businesses</li>
+        <li>Brands under $500K GMV (price-sensitive, pain not acute)</li>
+        <li>PE-backed or $10M+ brands (need fractional CFO, not bookkeeping)</li>
+      </ul>
+    </section>
+
+    <section class="p2w-section" id="executive-verdict" data-phase="1" data-section="executive-verdict" data-label="Executive Verdict">
+      <h2><span class="p2w-section-no">02</span> Executive Verdict</h2>
+      <p><strong>Promising but unfocused.</strong></p>
+      <p>
+        <strong>Strongest part:</strong> The recent collapse of a major SMB bookkeeping provider left thousands of DTC brands actively shopping for a replacement. The buying window is open now. <span class="p2w-ev" data-kind="inference">INFERENCE</span>
+      </p>
+      <p>
+        <strong>Weakest part:</strong> "DTC" is still too broad. Multi-channel brands (Shopify + Amazon + wholesale) have radically different accounting complexity. Pricing breaks.
+      </p>
+      <p>
+        <strong>Biggest risk:</strong> Founder hits the hiring wall at 15 clients. Trained DTC bookkeepers are scarce. Growth stalls before the unit economics validate. <span class="p2w-ev" data-kind="assumption">ASSUMPTION</span>
+      </p>
+      <p>
+        <strong>Fastest improvement:</strong> Cut to single-channel Shopify only, $500K–$3M GMV. Defer multi-channel until the close playbook is proven and the hiring pipeline is real. <span class="p2w-ev" data-kind="assumption">ASSUMPTION</span>
+      </p>
+    </section>
+
+    <section class="p2w-section" id="aspiration" data-phase="2" data-section="aspiration" data-label="Winning Aspiration">
+      <h2><span class="p2w-section-no">03</span> Winning Aspiration</h2>
+      <p>Become the default monthly bookkeeping service for single-channel Shopify DTC brands ($500K–$3M GMV) who are too big for a spreadsheet and too small for a CFO.</p>
+      <p><strong>Reject:</strong> "best in class", "modern bookkeeping for growing businesses", "AI-powered finance for every founder".</p>
+    </section>
+
+    <section class="p2w-section" id="where-to-play" data-phase="2" data-section="where-to-play" data-label="Where to Play">
+      <h2><span class="p2w-section-no">04</span> Where to Play</h2>
+      <table class="p2w-table">
+        <thead><tr><th>Choice</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td>Primary customer</td><td>Shopify DTC founder, $500K–$3M GMV, no in-house finance hire</td></tr>
+          <tr><td>End user</td><td>Same as primary (founder owns the books today)</td></tr>
+          <tr><td>Use case</td><td>Monthly close, inventory accounting, sales-tax reconciliation, tax-ready books</td></tr>
+          <tr><td>Market / category</td><td>"DTC bookkeeping" — adjacent to general SMB bookkeeping, narrower</td></tr>
+          <tr><td>Channel</td><td>DTC operator Slack communities and newsletters; agency referrals after 10 case studies</td></tr>
+          <tr><td>Price tier</td><td>Flat $499/month, no tiers, no hourly bolt-ons, no setup fee</td></tr>
+          <tr><td>Timing trigger</td><td>Provider failure, tax season, first audit notice, $1M milestone, fundraise prep</td></tr>
+        </tbody>
+      </table>
+      <h3 class="p2w-subhead">Where not to play</h3>
+      <ul class="p2w-exclude">
+        <li>Multi-channel brands (Amazon + Shopify + retail) — complexity breaks flat pricing</li>
+        <li>Service-based small businesses (no inventory, wrong workflow)</li>
+        <li>Brands under $500K GMV (price-sensitive, founder still doing it themselves)</li>
+        <li>PE-backed or $10M+ brands (need fractional CFO, not bookkeeping)</li>
+      </ul>
+    </section>
+
+    <section class="p2w-section" id="how-to-win" data-phase="2" data-section="how-to-win" data-label="How to Win">
+      <h2><span class="p2w-section-no">05</span> How to Win</h2>
+      <table class="p2w-table">
+        <thead><tr><th>Alternative</th><th>Why used now</th><th>Weakness</th><th>How we beat it</th></tr></thead>
+        <tbody>
+          <tr><td>Founder does it in QBO</td><td>Free, "I'll get to it"</td><td>8+ hours/month, mistakes at tax time</td><td>We give back the time and the accuracy</td></tr>
+          <tr><td>Generic SMB bookkeeper</td><td>Cheap, local</td><td>Doesn't know Shopify, A2X, or inventory accounting; asks the founder questions</td><td>We come pre-trained on the DTC stack</td></tr>
+          <tr><td>Pilot / Bench-tier service</td><td>Brand recognition</td><td>Generic workflow, slow inventory close, tiered pricing</td><td>DTC-native workflow, flat price, 7-day close</td></tr>
+          <tr><td>Hire in-house bookkeeper</td><td>Dedicated attention</td><td>$60K+/year fully loaded for one person</td><td>$6K/year fully outsourced with redundancy</td></tr>
+        </tbody>
+      </table>
+      <p class="p2w-pointer">▸ We win by being the only bookkeeping team that already knows how Shopify, A2X, and inventory accounting fit together, because we built the practice around DTC instead of bolting DTC onto a general firm.</p>
+    </section>
+
+    <section class="p2w-section" id="capabilities" data-phase="2" data-section="capabilities" data-label="Required Capabilities">
+      <h2><span class="p2w-section-no">06</span> Required Capabilities</h2>
+      <table class="p2w-table">
+        <thead><tr><th>Capability</th><th>Why it matters</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td>DTC monthly close playbook</td><td>Repeatable workflow per client</td><td>Build — founder's IP</td></tr>
+          <tr><td>A2X + inventory accounting expertise</td><td>The hard part competitors fumble</td><td>Build — founder's IP</td></tr>
+          <tr><td>Trained bookkeeper pool</td><td>The only way past 15 clients</td><td>Build (hiring + training pipeline)</td></tr>
+          <tr><td>Client portal and document intake</td><td>Reduces back-and-forth, lowers minutes/client</td><td>Buy (existing SaaS)</td></tr>
+          <tr><td>DTC operator referral network</td><td>Distribution past the first 20</td><td>Partner</td></tr>
+          <tr><td>Sales-tax software (TaxJar, etc.)</td><td>Compliance scales, we don't reinvent</td><td>Buy</td></tr>
+        </tbody>
+      </table>
+      <p class="p2w-pointer">▸ Biggest capability gap: Hiring and training bookkeepers who can run a DTC close without founder hand-holding. The founder is the bottleneck at 15 clients. Build the hiring pipeline before the marketing pipeline.</p>
+    </section>
+
+    <section class="p2w-section" id="management" data-phase="2" data-section="management" data-label="Management Systems">
+      <h2><span class="p2w-section-no">07</span> Management Systems</h2>
+      <table class="p2w-table">
+        <thead><tr><th>System</th><th>Track or do</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>Pipeline tracker</td><td>Conversations, trials started, paid conversions</td><td>Catches stalls early</td></tr>
+          <tr><td>Time-per-close per bookkeeper</td><td>Minutes per client per month</td><td>Margin lives or dies here</td></tr>
+          <tr><td>Month-3 retention dashboard</td><td>% of clients still active at day 90</td><td>The real churn signal, not month 1</td></tr>
+          <tr><td>NPS after first close</td><td>0–10 + reason</td><td>Predicts referrals and churn</td></tr>
+          <tr><td>Referral attribution</td><td>Which community or partner sent the lead</td><td>Find the 3 channels that matter</td></tr>
+        </tbody>
+      </table>
+      <p class="p2w-pointer">▸ Kill or reposition rule: If 30 qualified Shopify brands in the $500K–$3M range hear the offer, 10+ start a trial, and fewer than 3 stay past month 3, the pricing is wrong or the workflow does not actually save the founder time. Cut to $299/month or reposition as a year-end catch-up service.</p>
+    </section>
+
+    <section class="p2w-section" id="what-must-be-true" data-phase="3" data-section="what-must-be-true" data-label="What Must Be True">
+      <h2><span class="p2w-section-no">08</span> What Must Be True</h2>
+      <p>Click a row to jump to the choice it depends on.</p>
+      <ul class="p2w-assumptions">
+        <li data-relates="where-to-play" data-confidence="medium">
+          <span class="p2w-conf" data-level="medium">Medium</span>
+          <span>$500K–$3M Shopify brands feel monthly bookkeeping pain.
+            <span class="p2w-how">Test: survey 30 brands in DTC Slack; ask what they do today and where it breaks.</span></span>
+        </li>
+        <li data-relates="how-to-win" data-confidence="low">
+          <span class="p2w-conf" data-level="low">Low</span>
+          <span>Founders will pay $499/month flat.
+            <span class="p2w-how">Test: show pricing to 10 prospects with a real offer; measure trial signups.</span></span>
+        </li>
+        <li data-relates="capabilities" data-confidence="low">
+          <span class="p2w-conf" data-level="low">Low</span>
+          <span>Trained DTC bookkeepers can be hired in under 60 days.
+            <span class="p2w-how">Test: post one job; measure qualified applicants per week.</span></span>
+        </li>
+        <li data-relates="where-to-play how-to-win" data-confidence="medium">
+          <span class="p2w-conf" data-level="medium">Medium</span>
+          <span>Single-channel Shopify positioning beats generic bookkeeping for SEO and referrals.
+            <span class="p2w-how">Test: A/B landing copy; track time-on-page and conversion.</span></span>
+        </li>
+        <li data-relates="how-to-win management" data-confidence="medium">
+          <span class="p2w-conf" data-level="medium">Medium</span>
+          <span>Margin works at 35 minutes/week per client.
+            <span class="p2w-how">Test: time-track 3 pilot closes; back into hourly margin at $499.</span></span>
+        </li>
+        <li data-relates="management" data-confidence="unknown">
+          <span class="p2w-conf" data-level="unknown">Unknown</span>
+          <span>Month-3 retention stays above 95%.
+            <span class="p2w-how">Test: run pilots for 90+ days before scaling.</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="p2w-section" id="premortem" data-phase="3" data-section="premortem" data-label="Red-Team Pre-Mortem">
+      <h2><span class="p2w-section-no">09</span> Red-Team Pre-Mortem</h2>
+      <p>Assume failure 12 months from now. Likely reasons:</p>
+      <ol>
+        <li><strong>Founder became the bottleneck.</strong> Could not hire trained DTC bookkeepers fast enough. Capped at 20 clients. Growth stalled while overhead climbed.</li>
+        <li><strong>Brands churned at month 6.</strong> Got caught up on back-bookkeeping, then left. Did not see ongoing value once the books were clean.</li>
+        <li><strong>Larger competitors added DTC verticals.</strong> Pilot or a new entrant launched a DTC tier. The positioning edge eroded inside 18 months.</li>
+      </ol>
+      <h3 class="p2w-subhead">Top risks with countermeasures</h3>
+      <table class="p2w-table">
+        <thead><tr><th>Risk</th><th>Countermeasure</th></tr></thead>
+        <tbody>
+          <tr><td>Hiring bottleneck at 15 clients</td><td>Build the hiring pipeline before the marketing pipeline. Hire and train bookkeeper #2 before client #10.</td></tr>
+          <tr><td>Month-6 churn after catch-up</td><td>Bundle quarterly tax-prep and inventory-valuation reviews. Make the ongoing work visible.</td></tr>
+          <tr><td>Competitor adds DTC tier</td><td>Lock in operator-network exclusivity. Sign 5 agency partners as referral channels in the first 90 days.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="p2w-section" id="sharpened" data-phase="4" data-section="sharpened" data-label="Sharpened Version">
+      <h2><span class="p2w-section-no">10</span> Sharpened Version</h2>
+      <dl class="p2w-defs">
+        <dt>Original idea</dt><dd>"Bookkeeping for DTC brands."</dd>
+        <dt>Sharper version</dt><dd>"Flat-fee monthly bookkeeping for single-channel Shopify DTC brands doing $500K–$3M GMV. $499/month. Books closed in 7 business days."</dd>
+        <dt>Why better</dt><dd>Specific platform (Shopify), specific scale ($500K–$3M), specific channel posture (single-channel only), specific delivery promise (7-day close). Each constraint excludes a long list of bad-fit prospects.</dd>
+        <dt>Who it is for</dt><dd>Shopify DTC founders running one storefront, $500K–$3M GMV, no in-house finance person.</dd>
+        <dt>What it refuses to do</dt><dd>Multi-channel brands, service businesses, sub-$500K shops, $10M+ brands, tiered pricing, hourly bolt-ons.</dd>
+        <dt>First offer to test</dt><dd>3 pilot brands at $499/month for 90 days. Founder-led close on all 3. Goal: month-3 retention on 2 of 3.</dd>
+      </dl>
+    </section>
+
+    <section class="p2w-section" id="validation-plan" data-phase="4" data-section="validation-plan" data-label="30-Day Plan">
+      <h2><span class="p2w-section-no">11</span> 30-Day Validation Plan</h2>
+      <dl class="p2w-defs">
+        <dt>Week 1</dt><dd>Build ICP list of 30 single-channel Shopify brands in the $500K–$3M band. Ship a one-page landing page with the offer. Write the founder-led outreach script.</dd>
+        <dt>Week 2</dt><dd>Run 30 outbound conversations through DTC Slack communities and warm intros. Capture top 5 objections verbatim. Target 5 trial requests.</dd>
+        <dt>Week 3</dt><dd>Onboard 3 pilots. Run the first close. Time-track every minute. Document where the workflow breaks.</dd>
+        <dt>Week 4</dt><dd>Decision. 3 brands committed to month 2 at $499 = Proceed to next 10. 0–1 committed = pricing is wrong; test $299/month or reposition as catch-up only.</dd>
+      </dl>
+    </section>
+
+    <section class="p2w-section" id="summary" data-phase="4" data-section="summary" data-label="Presentation Summary">
+      <h2><span class="p2w-section-no">12</span> Presentation Summary</h2>
+      <dl class="p2w-defs">
+        <dt>Strategy in one sentence</dt><dd>Be the default monthly bookkeeping for single-channel Shopify DTC brands ($500K–$3M GMV), priced flat at $499/month with a 7-day close.</dd>
+        <dt>Who it is for</dt><dd>Shopify DTC founders running one storefront, no in-house finance person.</dd>
+        <dt>Why they care</dt><dd>They are losing 8 hours a month to QBO, making tax-time mistakes, and the obvious alternatives either do not know Shopify or charge $60K+ a year.</dd>
+        <dt>How we win</dt><dd>DTC-native workflow (Shopify, A2X, inventory) built in from day one, flat pricing, fast close.</dd>
+        <dt>What we will not do</dt><dd>Multi-channel, services, sub-$500K, $10M+, tiered pricing.</dd>
+        <dt>First proof point</dt><dd>2 of 3 pilot brands still paying at month 3.</dd>
+      </dl>
+    </section>
+
+    <section class="p2w-section" id="recommendation" data-phase="4" data-section="recommendation" data-label="Recommendation">
+      <h2>Recommendation</h2>
+      <aside class="p2w-verdict-plate" data-verdict="narrow">
+        <p class="p2w-verdict-word">▸ NARROW</p>
+        <p class="p2w-verdict-rationale">The buying window is open and the DTC-native workflow is a real wedge, but "DTC" is still too broad. Cut to single-channel Shopify brands at $500K–$3M GMV, prove the close playbook on 3 pilots, build the bookkeeper hiring pipeline before the marketing pipeline, then expand.</p>
+      </aside>
+    </section>
+  </main>
+</div>
+
+<footer class="p2w-footer">
+  <p>Generated 2026 with the <a href="https://github.com/paultaki/playing-to-win">Playing to Win</a>
+  strategy skill. Framework © Roger L. Martin &amp; A.G. Lafley,
+  <em>Playing to Win</em> (HBR Press, 2013).</p>
+</footer>
+
+<script>
+(function(){
+  var PHASES={'1':'I · Diagnosis','2':'II · The Cascade','3':'III · Stress Test','4':'IV · Verdict'};
+  var sections=[].slice.call(document.querySelectorAll('.p2w-main .p2w-section'));
+  var rail=document.querySelector('.p2w-rail');
+  var itemById={};
+
+  // 1. Build the rail grouped by phase
+  var lastPhase=null;
+  sections.forEach(function(sec){
+    var phase=sec.getAttribute('data-phase');
+    var label=sec.getAttribute('data-label')||sec.id;
+    if(phase!==lastPhase){
+      var h=document.createElement('p');
+      h.className='p2w-rail-phase';
+      h.textContent=PHASES[phase]||('Phase '+phase);
+      rail.appendChild(h); lastPhase=phase;
+    }
+    var a=document.createElement('a');
+    a.className='p2w-rail-item'; a.href='#'+sec.id; a.textContent=label;
+    rail.appendChild(a); itemById[sec.id]=a;
+  });
+
+  // 2. Scrollspy + progress fill (use the topmost intersecting section)
+  var fill=document.querySelector('.p2w-progress-fill');
+  var activeId=null;
+  function setActive(id){
+    if(id===activeId)return; activeId=id;
+    for(var k in itemById){itemById[k].classList.toggle('is-active',k===id);}
+    var idx=sections.map(function(s){return s.id;}).indexOf(id);
+    if(fill)fill.style.width=((idx+1)/sections.length*100)+'%';
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      var visible=entries.filter(function(e){return e.isIntersecting;});
+      if(!visible.length)return;
+      visible.sort(function(a,b){return a.boundingClientRect.top-b.boundingClientRect.top;});
+      setActive(visible[0].target.id);
+    },{rootMargin:'-30% 0px -60% 0px',threshold:0});
+    sections.forEach(function(s){io.observe(s);});
+  }
+
+  // 3. Cross-highlight helper (defined before use in setOpen handlers)
+  var assumptions=[].slice.call(document.querySelectorAll('.p2w-assumptions li'));
+  function highlight(nodeKey){
+    assumptions.forEach(function(li){
+      var rel=(li.getAttribute('data-relates')||'').split(/\s+/);
+      li.classList.toggle('is-linked',!!nodeKey&&rel.indexOf(nodeKey)>=0);
+    });
+  }
+
+  // 4. Cascade: accordion expand/collapse with measured height.
+  //    Details are visible by default in CSS (readable with JS off); collapse on init.
+  var nodes=[].slice.call(document.querySelectorAll('.p2w-node'));
+  function setOpen(node,open){
+    var head=node.querySelector('.p2w-node-head');
+    var detail=node.querySelector('.p2w-node-detail');
+    node.classList.toggle('is-open',open);
+    if(head)head.setAttribute('aria-expanded',open?'true':'false');
+    if(detail)detail.style.maxHeight=open?detail.scrollHeight+'px':'0';
+  }
+  nodes.forEach(function(node){
+    var head=node.querySelector('.p2w-node-head');
+    if(!head)return;
+    setOpen(node,false);
+    head.addEventListener('click',function(){
+      var willOpen=!node.classList.contains('is-open');
+      if(willOpen)nodes.forEach(function(o){if(o!==node)setOpen(o,false);});
+      setOpen(node,willOpen);
+      highlight(willOpen?node.getAttribute('data-node'):null);
+    });
+  });
+
+  // clicking an assumption opens (accordion) + scrolls to its related node
+  assumptions.forEach(function(li){
+    li.addEventListener('click',function(){
+      var rel=(li.getAttribute('data-relates')||'').split(/\s+/)[0];
+      if(!rel)return;
+      var node=document.querySelector('.p2w-node[data-node="'+rel+'"]');
+      if(!node)return;
+      if(!node.classList.contains('is-open')){
+        nodes.forEach(function(o){if(o!==node)setOpen(o,false);});
+        setOpen(node,true); highlight(rel);
+      }
+      node.scrollIntoView({block:'center'});
+    });
+  });
+
+  // 5. Spotlight toggle
+  var btn=document.getElementById('p2w-spotlight-toggle');
+  if(btn)btn.addEventListener('click',function(){
+    var on=document.body.classList.toggle('p2w-spotlight');
+    btn.setAttribute('aria-pressed',on?'true':'false');
+  });
+})();
+</script>
+</body>
+</html>
