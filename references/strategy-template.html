@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{SUBJECT}} — Playing to Win</title>
+<style>
+:root{
+  --ink:#111;--paper:#fff;--red:#e2231a;
+  --gray-1:#666;--gray-2:#8a8a8a;--line:#e3e3e3;--bg-soft:#fafafa;
+  --rail-w:280px;--content-max:760px;
+  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'Helvetica Neue',Arial,'Segoe UI',Roboto,system-ui,sans-serif;
+  --space:clamp(2rem,4vw,4rem);--dur:200ms;--ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h2,h3{font-weight:800}
+a{color:var(--ink);text-underline-offset:3px}
+
+.p2w-masthead{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;
+  padding:var(--space) var(--space) 1.5rem;border-bottom:2px solid var(--ink)}
+.p2w-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gray-1);margin:0 0 .75rem}
+.p2w-title{font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-.02em;
+  line-height:1.02;margin:0}
+.p2w-meta{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:1rem 0 0;
+  font-size:13px;color:var(--gray-1)}
+.p2w-chip{background:var(--red);color:#fff;font-weight:800;letter-spacing:.08em;
+  font-size:12px;padding:.3em .7em}
+#p2w-spotlight-toggle{margin-top:1.1rem;font:600 12px/1 var(--sans);letter-spacing:.04em;
+  background:none;border:1px solid var(--ink);padding:.6em .95em;cursor:pointer}
+#p2w-spotlight-toggle[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.p2w-progress{position:sticky;top:0;height:3px;background:var(--line);z-index:20}
+.p2w-progress-fill{height:100%;width:0;background:var(--red);transition:width var(--dur) var(--ease)}
+
+.p2w-layout{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;display:grid;
+  grid-template-columns:var(--rail-w) 1fr;gap:var(--space);padding:0 var(--space)}
+@media (max-width:880px){.p2w-layout{grid-template-columns:1fr;gap:0}}
+
+.p2w-rail{position:sticky;top:2rem;align-self:start;height:max-content;padding:2rem 0;font-size:13px}
+@media (max-width:880px){.p2w-rail{position:static;padding:1rem 0;border-bottom:1px solid var(--line)}}
+.p2w-rail-phase{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink);font-weight:700;margin:1.4rem 0 .4rem}
+.p2w-rail-phase:first-child{margin-top:0}
+.p2w-rail-item{display:block;color:var(--gray-1);text-decoration:none;padding:.3rem 0 .3rem .8rem;
+  border-left:2px solid transparent;line-height:1.3}
+.p2w-rail-item:hover{color:var(--ink)}
+.p2w-rail-item.is-active{color:var(--ink);font-weight:700;border-left-color:var(--red)}
+.p2w-rail-item:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+.p2w-main{min-width:0;max-width:var(--content-max);padding:2rem 0 6rem}
+.p2w-section{padding:2.5rem 0;border-top:1px solid var(--line);scroll-margin-top:2rem}
+.p2w-section:first-child{border-top:none;padding-top:1rem}
+.p2w-section>h2{font-size:13px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gray-1);margin:0 0 1.2rem;display:flex;gap:.6rem;align-items:baseline}
+.p2w-section-no{color:var(--red);font-weight:700}
+.p2w-subhead{font-size:12px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray-1);margin:1.6rem 0 .6rem}
+
+.p2w-cascade{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.p2w-node{border-bottom:1px solid var(--line)}
+.p2w-node-head{display:flex;gap:1rem;align-items:baseline;width:100%;text-align:left;background:none;
+  border:none;cursor:pointer;padding:1rem 0;font:800 18px/1.2 var(--sans);color:var(--ink)}
+.p2w-node-head:hover{background:var(--bg-soft)}
+.p2w-node-head:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.p2w-num{font-size:28px;font-weight:800;line-height:1;min-width:1.6em;color:var(--gray-2)}
+.p2w-node:first-child .p2w-num,.p2w-node.is-open .p2w-num{color:var(--red)}
+.p2w-node-detail{overflow:hidden;transition:max-height var(--dur) var(--ease)}
+.p2w-node-detail-inner{padding:0 0 1.2rem 3.4rem;font-size:15px}
+
+.p2w-assumptions{list-style:none;margin:0;padding:0}
+.p2w-assumptions li{display:flex;gap:.8rem;align-items:baseline;padding:.7rem 0;
+  border-bottom:1px solid var(--line);cursor:pointer;transition:background var(--dur)}
+.p2w-assumptions li.is-linked{background:#fff4f3;box-shadow:inset 3px 0 0 var(--red)}
+.p2w-conf{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  padding:.2em .5em;border:1px solid var(--ink);min-width:5.5em;text-align:center}
+.p2w-conf[data-level="low"]{color:var(--red);border-color:var(--red)}
+.p2w-conf[data-level="unknown"]{border-style:dashed;color:var(--gray-1)}
+.p2w-how{display:block;font-size:12px;color:var(--gray-1);margin-top:.2rem}
+
+.p2w-exclude{list-style:none;margin:0;padding:0}
+.p2w-exclude li{padding:.5rem 0 .5rem 1.6rem;position:relative;color:var(--gray-1);
+  text-decoration:line-through;text-decoration-color:var(--red)}
+.p2w-exclude li::before{content:"✕";position:absolute;left:0;color:var(--red);font-weight:700;
+  text-decoration:none}
+
+.p2w-table{width:100%;border-collapse:collapse;font-size:14px;margin:.5rem 0}
+.p2w-table th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--gray-1);border-bottom:2px solid var(--ink);
+  padding:.6rem .8rem .6rem 0;vertical-align:bottom}
+.p2w-table td{border-bottom:1px solid var(--line);padding:.7rem .8rem .7rem 0;vertical-align:top}
+.p2w-table tr:hover td{background:var(--bg-soft)}
+
+.p2w-ev{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:.15em .45em;white-space:nowrap}
+.p2w-ev[data-kind="fact"]{background:var(--ink);color:#fff}
+.p2w-ev[data-kind="inference"]{border:1px solid var(--ink)}
+.p2w-ev[data-kind="assumption"]{background:var(--red);color:#fff}
+.p2w-ev[data-kind="speculation"]{border:1px dashed var(--gray-1);color:var(--gray-1)}
+
+.p2w-pointer{font-weight:700;border-left:3px solid var(--red);padding-left:1rem;margin:1.4rem 0}
+
+.p2w-defs{margin:0}
+.p2w-defs dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gray-1);margin-top:1.1rem}
+.p2w-defs dd{margin:.25rem 0 0}
+
+.p2w-verdict-plate{background:var(--red);color:#fff;padding:var(--space);margin-top:2.5rem}
+.p2w-verdict-word{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:.02em;margin:0}
+.p2w-verdict-rationale{font-size:17px;line-height:1.5;margin:1rem 0 0;max-width:60ch}
+
+.p2w-footer{max-width:calc(var(--rail-w) + var(--content-max));margin:0 auto;
+  padding:2rem var(--space) 4rem;border-top:1px solid var(--line);font-size:12px;color:var(--gray-1)}
+.p2w-footer a{color:var(--gray-1)}
+
+body.p2w-spotlight .p2w-main>.p2w-section{opacity:.22;transition:opacity var(--dur)}
+body.p2w-spotlight .p2w-section:has(.p2w-ev[data-kind="assumption"]),
+body.p2w-spotlight .p2w-section:has(.p2w-conf[data-level="low"]),
+body.p2w-spotlight .p2w-section:has(.p2w-conf[data-level="unknown"]){opacity:1}
+body.p2w-spotlight .p2w-assumptions li{opacity:.22}
+body.p2w-spotlight .p2w-assumptions li:has(.p2w-conf[data-level="low"]),
+body.p2w-spotlight .p2w-assumptions li:has(.p2w-conf[data-level="unknown"]){opacity:1}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
+@media print{
+  .p2w-rail,.p2w-progress,#p2w-spotlight-toggle{display:none}
+  .p2w-layout{display:block;max-width:none;padding:0}
+  .p2w-main{max-width:none;padding:0}
+  .p2w-node-detail{max-height:none!important;overflow:visible!important}
+  .p2w-node-head{cursor:default}
+  .p2w-section{break-inside:avoid}
+  body{font-size:11pt}
+}
+</style>
+</head>
+<body>
+<header class="p2w-masthead">
+  <p class="p2w-kicker">Playing to Win · Strategy Dossier</p>
+  <h1 class="p2w-title">{{SUBJECT}}</h1>
+  <p class="p2w-meta">
+    <span class="p2w-chip">{{VERDICT}}</span>
+    <span class="p2w-confidence">{{CONFIDENCE}} confidence</span>
+    <span class="p2w-date">{{DATE}}</span>
+  </p>
+  <button id="p2w-spotlight-toggle" type="button" aria-pressed="false">Spotlight assumptions</button>
+</header>
+
+<div class="p2w-progress" aria-hidden="true"><div class="p2w-progress-fill"></div></div>
+
+<div class="p2w-layout">
+  <nav class="p2w-rail" aria-label="Strategy sections"><!-- built by JS --></nav>
+  <main class="p2w-main">
+<!-- P2W:BODY -->
+  </main>
+</div>
+
+<footer class="p2w-footer">
+  <p>Generated {{YEAR}} with the <a href="https://github.com/paultaki/playing-to-win">Playing to Win</a>
+  strategy skill. Framework © Roger L. Martin &amp; A.G. Lafley,
+  <em>Playing to Win</em> (HBR Press, 2013).</p>
+</footer>
+
+<script>
+(function(){
+  var PHASES={'1':'I · Diagnosis','2':'II · The Cascade','3':'III · Stress Test','4':'IV · Verdict'};
+  var sections=[].slice.call(document.querySelectorAll('.p2w-main .p2w-section'));
+  var rail=document.querySelector('.p2w-rail');
+  var itemById={};
+
+  // 1. Build the rail grouped by phase
+  var lastPhase=null;
+  sections.forEach(function(sec){
+    var phase=sec.getAttribute('data-phase');
+    var label=sec.getAttribute('data-label')||sec.id;
+    if(phase!==lastPhase){
+      var h=document.createElement('p');
+      h.className='p2w-rail-phase';
+      h.textContent=PHASES[phase]||('Phase '+phase);
+      rail.appendChild(h); lastPhase=phase;
+    }
+    var a=document.createElement('a');
+    a.className='p2w-rail-item'; a.href='#'+sec.id; a.textContent=label;
+    rail.appendChild(a); itemById[sec.id]=a;
+  });
+
+  // 2. Scrollspy + progress fill (use the topmost intersecting section)
+  var fill=document.querySelector('.p2w-progress-fill');
+  var activeId=null;
+  function setActive(id){
+    if(id===activeId)return; activeId=id;
+    for(var k in itemById){itemById[k].classList.toggle('is-active',k===id);}
+    var idx=sections.map(function(s){return s.id;}).indexOf(id);
+    if(fill)fill.style.width=((idx+1)/sections.length*100)+'%';
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      var visible=entries.filter(function(e){return e.isIntersecting;});
+      if(!visible.length)return;
+      visible.sort(function(a,b){return a.boundingClientRect.top-b.boundingClientRect.top;});
+      setActive(visible[0].target.id);
+    },{rootMargin:'-30% 0px -60% 0px',threshold:0});
+    sections.forEach(function(s){io.observe(s);});
+  }
+
+  // 3. Cross-highlight helper (defined before use in setOpen handlers)
+  var assumptions=[].slice.call(document.querySelectorAll('.p2w-assumptions li'));
+  function highlight(nodeKey){
+    assumptions.forEach(function(li){
+      var rel=(li.getAttribute('data-relates')||'').split(/\s+/);
+      li.classList.toggle('is-linked',!!nodeKey&&rel.indexOf(nodeKey)>=0);
+    });
+  }
+
+  // 4. Cascade: accordion expand/collapse with measured height.
+  //    Details are visible by default in CSS (readable with JS off); collapse on init.
+  var nodes=[].slice.call(document.querySelectorAll('.p2w-node'));
+  function setOpen(node,open){
+    var head=node.querySelector('.p2w-node-head');
+    var detail=node.querySelector('.p2w-node-detail');
+    node.classList.toggle('is-open',open);
+    if(head)head.setAttribute('aria-expanded',open?'true':'false');
+    if(detail)detail.style.maxHeight=open?detail.scrollHeight+'px':'0';
+  }
+  nodes.forEach(function(node){
+    var head=node.querySelector('.p2w-node-head');
+    if(!head)return;
+    setOpen(node,false);
+    head.addEventListener('click',function(){
+      var willOpen=!node.classList.contains('is-open');
+      if(willOpen)nodes.forEach(function(o){if(o!==node)setOpen(o,false);});
+      setOpen(node,willOpen);
+      highlight(willOpen?node.getAttribute('data-node'):null);
+    });
+  });
+
+  // clicking an assumption opens (accordion) + scrolls to its related node
+  assumptions.forEach(function(li){
+    li.addEventListener('click',function(){
+      var rel=(li.getAttribute('data-relates')||'').split(/\s+/)[0];
+      if(!rel)return;
+      var node=document.querySelector('.p2w-node[data-node="'+rel+'"]');
+      if(!node)return;
+      if(!node.classList.contains('is-open')){
+        nodes.forEach(function(o){if(o!==node)setOpen(o,false);});
+        setOpen(node,true); highlight(rel);
+      }
+      node.scrollIntoView({block:'center'});
+    });
+  });
+
+  // 5. Spotlight toggle
+  var btn=document.getElementById('p2w-spotlight-toggle');
+  if(btn)btn.addEventListener('click',function(){
+    var on=document.body.classList.toggle('p2w-spotlight');
+    btn.setAttribute('aria-pressed',on?'true':'false');
+  });
+})();
+</script>
+</body>
+</html>
