@@ -39,3 +39,6 @@ strategy/
 # Local-only test scratch
 scratch/
 *.local.md
+
+# Visual brainstorming companion (superpowers)
+.superpowers/
